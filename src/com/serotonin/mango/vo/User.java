@@ -362,7 +362,7 @@ public class User implements SetPointSource, HttpSessionBindingListener, JsonSer
 
     public void setMuted(boolean muted){
         try{
-        FileWriter myWriter = new FileWriter("/Users/pritul/Books/SEUTd/Project/mangoSource/Mango_logs.txt",true);
+        FileWriter myWriter = new FileWriter("Mango_logs.txt",true);
         myWriter.write("Muted value: "+String.valueOf(muted));
         myWriter.close();
     }
