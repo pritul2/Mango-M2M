@@ -156,6 +156,8 @@
               window.location.reload();
           
           var points = data.points;
+          console.log("Points");
+          console.log(points);
           owner = data.access == <c:out value="<%= ShareUser.ACCESS_OWNER %>"/>;
           
           // Add the new rows.

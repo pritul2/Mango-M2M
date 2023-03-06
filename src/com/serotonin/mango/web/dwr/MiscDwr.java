@@ -20,6 +20,7 @@ package com.serotonin.mango.web.dwr;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -138,7 +139,9 @@ public class MiscDwr extends BaseDwr {
     public boolean toggleUserMuted() {
         User user = Common.getUser();
         if (user != null) {
+            
             user.setMuted(!user.isMuted());
+
             return user.isMuted();
         }
         return false;

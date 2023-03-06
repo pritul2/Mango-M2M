@@ -18,6 +18,8 @@
  */
 package com.serotonin.mango.vo;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,7 +93,7 @@ public class User implements SetPointSource, HttpSessionBindingListener, JsonSer
     private transient Map<String, byte[]> reportImageData;
     private transient PublisherVO<? extends PublishedPointVO> editPublisher;
     private transient ImportTask importTask;
-    private transient boolean muted = false;
+    private transient boolean muted = true;
     private transient DataExportDefinition dataExportDefinition;
     private transient Map<String, Object> attributes = new HashMap<String, Object>();
 
@@ -358,7 +360,15 @@ public class User implements SetPointSource, HttpSessionBindingListener, JsonSer
         return muted;
     }
 
-    public void setMuted(boolean muted) {
+    public void setMuted(boolean muted){
+        try{
+        FileWriter myWriter = new FileWriter("/Users/pritul/Books/SEUTd/Project/mangoSource/Mango_logs.txt",true);
+        myWriter.write("Muted value: "+String.valueOf(muted));
+        myWriter.close();
+    }
+    catch(Exception e){
+        System.out.println(e);
+    }
         this.muted = muted;
     }
 

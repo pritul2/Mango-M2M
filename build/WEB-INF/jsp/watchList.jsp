@@ -218,7 +218,9 @@
           watchlistChangeId++;
           var id = watchlistChangeId;
           WatchListDwr.setSelectedWatchList($get("watchListSelect"), function(data) {
-        	  if (id == watchlistChangeId)
+        	console.log("Points");
+          console.log(data);  
+            if (id == watchlistChangeId)
                   displayWatchList(data);
           });
       }
@@ -277,6 +279,7 @@
       // Watch list membership
       //
       function addToWatchList(pointId) {
+
           // Check if this point is already in the watch list.
           if ($("p"+ pointId) || !owner)
               return;
