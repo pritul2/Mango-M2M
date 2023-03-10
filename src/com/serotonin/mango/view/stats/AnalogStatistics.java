@@ -18,8 +18,6 @@
  */
 package com.serotonin.mango.view.stats;
 
-import java.io.FileWriter;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -134,9 +132,7 @@ public class AnalogStatistics implements StatisticsGenerator {
     }
 
     public double getMinimum() {
-        DecimalFormat df = new DecimalFormat("#.##");
-        double truncatedNumber = Double.parseDouble(df.format(maximum));
-        return truncatedNumber;
+        return minimum;
     }
 
     public long getMinTime() {
@@ -144,9 +140,7 @@ public class AnalogStatistics implements StatisticsGenerator {
     }
 
     public double getMaximum() {
-        DecimalFormat df = new DecimalFormat("#.##");
-        double truncatedNumber = Double.parseDouble(df.format(maximum));
-        return truncatedNumber;
+        return maximum;
     }
 
     public long getMaxTime() {
@@ -154,20 +148,11 @@ public class AnalogStatistics implements StatisticsGenerator {
     }
 
     public double getAverage() {
-        DecimalFormat df = new DecimalFormat("#.##");
-        double truncatedNumber = Double.parseDouble(df.format(average));
-        try{
-            FileWriter fw = new FileWriter("logs.txt");
-            fw.write("Average "+truncatedNumber);
-            fw.close();}
-            catch(Exception e){ }
-        return truncatedNumber;
+        return average;
     }
 
     public double getSum() {
-        DecimalFormat df = new DecimalFormat("#.##");
-        double truncatedNumber = Double.parseDouble(df.format(sum));
-        return truncatedNumber;
+        return sum;
     }
 
     public int getCount() {
