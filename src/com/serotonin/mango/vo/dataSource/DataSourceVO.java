@@ -530,4 +530,31 @@ abstract public class DataSourceVO<T extends DataSourceVO<?>> implements Seriali
 
         return value;
     }
+
+    // Code smell resolution for feature envy
+    public void save() {
+        if (this.id == Common.NEW_ID) {
+            insert();
+        } else {
+            update();
+        }
+    }
+
+    private void insert() {
+        final String insertSql = "insert into dataSources (xid, name, dataSourceType, data) values (?,?,?,?)";
+        final Object[] insertArgs = { this.xid, this.name, this.type.getId(), SerializationHelper.writeObject(this) };
+        final int[] insertArgTypes = { Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.BLOB };
+        this.id = doInsert(insertSql, insertArgs, insertArgTypes);
+        AuditEventType.raiseAddedEvent(AuditEventType.TYPE_DATA_SOURCE, this);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void update() {
+        DataSourceVO<?> old = getById(this.id);
+        final String updateSql = "update dataSources set xid=?, name=?, data=? where id=?";
+        final Object[] updateArgs = { this.xid, this.name, SerializationHelper.writeObject(this), this.id };
+        final int[] updateArgTypes = { Types.VARCHAR, Types.VARCHAR, Types.BLOB, Types.INTEGER };
+        ejt.update(updateSql, updateArgs, updateArgTypes);
+        AuditEventType.raiseChangedEvent(AuditEventType.TYPE_DATA_SOURCE, old, (ChangeComparable<DataSourceVO<?>>) this);
+    }
 }

@@ -78,48 +78,57 @@ public class StatisticsChartRenderer extends TimePeriodChartRenderer {
         PointValueFacade pointValueFacade = new PointValueFacade(point.getId());
         List<PointValueTime> values = pointValueFacade.getPointValues(startTime);
 
-        // Generate statistics on the values.
-        int dataTypeId = point.getPointLocator().getDataTypeId();
-
-        // The start value is the value of the point at the start of the period for this renderer.
-        PointValueTime startValue = null;
-        if (values.size() == 0 || values.get(0).getTime() > startTime) {
-            // Get the value of the point at the start time
-            PointValueTime valueTime = pointValueFacade.getPointValueBefore(startTime);
-            if (valueTime != null)
-                startValue = new PointValueTime(valueTime.getValue(), startTime);
+        if (values.isEmpty()) {
+            return;
         }
 
-        if (startValue != null || values.size() > 0) {
-            if (dataTypeId == DataTypes.BINARY || dataTypeId == DataTypes.MULTISTATE) {
-                // Runtime stats
-                StartsAndRuntimeList stats = new StartsAndRuntimeList(startValue, values, startTime, startTime
-                        + getDuration());
-                model.put("start", stats.getRealStart());
-                model.put("end", stats.getEnd());
-                model.put("startsAndRuntimes", stats.getData());
+        int dataTypeId = point.getPointLocator().getDataTypeId();
+        if (dataTypeId == DataTypes.BINARY || dataTypeId == DataTypes.MULTISTATE) {
+            addRuntimeStatsToModel(model, values, startTime);
+        } else if (dataTypeId == DataTypes.NUMERIC) {
+            addAnalogStatsToModel(model, values, startTime);
+            if (includeSum) {
+                double sum = new AnalogStatistics(startValue, values, startTime, startTime + getDuration()).getSum();
+                model.put("sum", sum);
             }
-            else if (dataTypeId == DataTypes.NUMERIC) {
-                AnalogStatistics stats = new AnalogStatistics(startValue, values, startTime, startTime + getDuration());
-                model.put("start", stats.getRealStart());
-                model.put("end", stats.getEnd());
-                model.put("minimum", stats.getMinimum());
-                model.put("minTime", stats.getMinTime());
-                model.put("maximum", stats.getMaximum());
-                model.put("maxTime", stats.getMaxTime());
-                model.put("average", stats.getAverage());
-                if (includeSum)
-                    model.put("sum", stats.getSum());
-                model.put("count", stats.getCount());
-                model.put("noData", stats.isNoData());
-            }
-            else if (dataTypeId == DataTypes.ALPHANUMERIC) {
-                ValueChangeCounter stats = new ValueChangeCounter(startValue, values);
-                model.put("changeCount", stats.getChangeCount());
-            }
+        } else if (dataTypeId == DataTypes.ALPHANUMERIC) {
+            addValueChangeCountToModel(model, values, startTime);
         }
 
         model.put("logEntries", values.size());
+    }
+
+    private void addRuntimeStatsToModel(Map<String, Object> model, List<PointValueTime> values, long startTime) {
+        StartsAndRuntimeList stats = new StartsAndRuntimeList(getStartValue(values, startTime), values, startTime, startTime + getDuration());
+        model.put("start", stats.getRealStart());
+        model.put("end", stats.getEnd());
+        model.put("startsAndRuntimes", stats.getData());
+    }
+
+    private void addAnalogStatsToModel(Map<String, Object> model, List<PointValueTime> values, long startTime) {
+        AnalogStatistics stats = new AnalogStatistics(getStartValue(values, startTime), values, startTime, startTime + getDuration());
+        model.put("start", stats.getRealStart());
+        model.put("end", stats.getEnd());
+        model.put("minimum", stats.getMinimum());
+        model.put("minTime", stats.getMinTime());
+        model.put("maximum", stats.getMaximum());
+        model.put("maxTime", stats.getMaxTime());
+        model.put("average", stats.getAverage());
+        model.put("count", stats.getCount());
+        model.put("noData", stats.isNoData());
+    }
+
+    private void addValueChangeCountToModel(Map<String, Object> model, List<PointValueTime> values, long startTime) {
+        ValueChangeCounter stats = new ValueChangeCounter(getStartValue(values, startTime), values);
+        model.put("changeCount", stats.getChangeCount());
+    }
+
+    private PointValueTime getStartValue(List<PointValueTime> values, long startTime) {
+        PointValueFacade pointValueFacade = new PointValueFacade(values.get(0).getId());
+        if (values.get(0).getTime() > startTime) {
+            return pointValueFacade.getPointValueBefore(startTime);
+        }
+        return new PointValueTime(values.get(0).getValue(), startTime);
     }
 
     //

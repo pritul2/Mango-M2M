@@ -63,12 +63,17 @@ public class DataSourceDao extends BaseDao {
     }
 
     public DataSourceVO<?> getDataSource(int id) {
-        return queryForObject(DATA_SOURCE_SELECT + " where id=?", new Object[] { id }, new DataSourceRowMapper(), null);
+        return getDataSource("id", id);
     }
 
     public DataSourceVO<?> getDataSource(String xid) {
-        return queryForObject(DATA_SOURCE_SELECT + " where xid=?", new Object[] { xid }, new DataSourceRowMapper(),
-                null);
+        return getDataSource("xid", xid);
+    }
+
+    private DataSourceVO<?> getDataSource(String fieldName, Object value) {
+        String sql = DATA_SOURCE_SELECT + " where " + fieldName + "=?";
+        Object[] params = new Object[]{value};
+        return queryForObject(sql, params, new DataSourceRowMapper(), null);
     }
 
     class DataSourceRowMapper implements GenericRowMapper<DataSourceVO<?>> {
@@ -90,30 +95,18 @@ public class DataSourceDao extends BaseDao {
     }
 
     public void saveDataSource(final DataSourceVO<?> vo) {
-        // Decide whether to insert or update.
-        if (vo.getId() == Common.NEW_ID)
-            insertDataSource(vo);
-        else
-            updateDataSource(vo);
+        vo.save();
     }
 
     private void insertDataSource(final DataSourceVO<?> vo) {
-        vo.setId(doInsert("insert into dataSources (xid, name, dataSourceType, data) values (?,?,?,?)", new Object[] {
-                vo.getXid(), vo.getName(), vo.getType().getId(), SerializationHelper.writeObject(vo) }, new int[] {
-                Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.BLOB }));
-
-        AuditEventType.raiseAddedEvent(AuditEventType.TYPE_DATA_SOURCE, vo);
+        vo.insert();
     }
 
     @SuppressWarnings("unchecked")
     private void updateDataSource(final DataSourceVO<?> vo) {
-        DataSourceVO<?> old = getDataSource(vo.getId());
-        ejt.update("update dataSources set xid=?, name=?, data=? where id=?", new Object[] { vo.getXid(), vo.getName(),
-                SerializationHelper.writeObject(vo), vo.getId() }, new int[] { Types.VARCHAR, Types.VARCHAR,
-                Types.BLOB, Types.INTEGER });
-
-        AuditEventType.raiseChangedEvent(AuditEventType.TYPE_DATA_SOURCE, old, (ChangeComparable<DataSourceVO<?>>) vo);
+        vo.update();
     }
+
 
     public void deleteDataSource(final int dataSourceId) {
         DataSourceVO<?> vo = getDataSource(dataSourceId);
